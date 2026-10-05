@@ -1,21 +1,21 @@
-import { db, setSetting } from './database';
-import { DEFAULT_EXERCISES } from '../data/exercises';
-import { DEFAULT_SCHEDULE, WORKOUT_TEMPLATES } from '../data/schedule';
-import { PROGRESSION_TREES, GOAL_CATEGORIES } from '../data/progressions';
-import { todayString } from '../utils/helpers';
+import { db, setSetting } from "./database";
+import { DEFAULT_EXERCISES } from "../data/exercises";
+import { DEFAULT_SCHEDULE, WORKOUT_TEMPLATES } from "../data/schedule";
+import { PROGRESSION_TREES, GOAL_CATEGORIES } from "../data/progressions";
+import { todayString } from "../utils/helpers";
 
 /** Initialize the database with default data on first launch */
 export async function initializeDatabase(programStartDate, abilities = {}) {
   const now = new Date().toISOString();
 
   // Save settings
-  await setSetting('programStartDate', programStartDate);
-  await setSetting('onboardingComplete', true);
+  await setSetting("programStartDate", programStartDate);
+  await setSetting("onboardingComplete", true);
 
   // Insert default exercises
   const existingExercises = await db.exercises.count();
   if (existingExercises === 0) {
-    const exercises = DEFAULT_EXERCISES.map(ex => ({
+    const exercises = DEFAULT_EXERCISES.map((ex) => ({
       ...ex,
       createdAt: now,
       updatedAt: now,
@@ -37,7 +37,7 @@ export async function initializeDatabase(programStartDate, abilities = {}) {
       achievedAt: null,
       originalTarget: PROGRESSION_TREES[key].target,
       deadline: null,
-      status: 'active',
+      status: "active",
       createdAt: now,
       updatedAt: now,
     }));
@@ -47,11 +47,13 @@ export async function initializeDatabase(programStartDate, abilities = {}) {
   // Insert default weekly schedule
   const existingSchedule = await db.weeklySchedule.count();
   if (existingSchedule === 0) {
-    await db.weeklySchedule.bulkAdd(DEFAULT_SCHEDULE.map(d => ({
-      ...d,
-      createdAt: now,
-      updatedAt: now,
-    })));
+    await db.weeklySchedule.bulkAdd(
+      DEFAULT_SCHEDULE.map((d) => ({
+        ...d,
+        createdAt: now,
+        updatedAt: now,
+      })),
+    );
   }
 }
 
@@ -88,7 +90,7 @@ export async function updateWorkout(id, changes) {
 /** Get today's workout */
 export async function getTodayWorkout() {
   const today = todayString();
-  return await db.workouts.where('date').equals(today).first();
+  return await db.workouts.where("date").equals(today).first();
 }
 
 /** Get workout template for a day type */
@@ -100,8 +102,9 @@ export function getWorkoutTemplate(dayType) {
 export async function checkPersonalRecord(exerciseId, type, value) {
   const now = new Date().toISOString();
   const existing = await db.personalRecords
-    .where('exerciseId').equals(exerciseId)
-    .filter(r => r.type === type)
+    .where("exerciseId")
+    .equals(exerciseId)
+    .filter((r) => r.type === type)
     .first();
 
   if (!existing || value > existing.value) {
@@ -121,7 +124,11 @@ export async function checkPersonalRecord(exerciseId, type, value) {
       await db.personalRecords.add(prData);
     }
 
-    return { isNewPR: true, previousValue: existing?.value || null, newValue: value };
+    return {
+      isNewPR: true,
+      previousValue: existing?.value || null,
+      newValue: value,
+    };
   }
 
   return { isNewPR: false };
@@ -140,12 +147,12 @@ export async function updateGoalProgress(goalId, currentBest) {
   // Check if goal achieved
   if (currentBest >= goal.target && !goal.achievedAt) {
     updates.achievedAt = new Date().toISOString();
-    updates.status = 'achieved';
+    updates.status = "achieved";
 
     // Log goal history
     await db.goalHistory.add({
       goalId,
-      type: 'achieved',
+      type: "achieved",
       value: currentBest,
       target: goal.target,
       createdAt: new Date().toISOString(),
@@ -157,7 +164,12 @@ export async function updateGoalProgress(goalId, currentBest) {
 }
 
 /** Create a new advanced goal after achieving one */
-export async function createAdvancedGoal(originalGoalId, newTarget, newName, variation) {
+export async function createAdvancedGoal(
+  originalGoalId,
+  newTarget,
+  newName,
+  variation,
+) {
   const now = new Date().toISOString();
   const original = await db.goals.get(originalGoalId);
   if (!original) return null;
@@ -165,7 +177,7 @@ export async function createAdvancedGoal(originalGoalId, newTarget, newName, var
   // Log history
   await db.goalHistory.add({
     goalId: originalGoalId,
-    type: 'advanced',
+    type: "advanced",
     value: original.currentBest,
     newTarget,
     newName: newName || variation,
@@ -176,7 +188,7 @@ export async function createAdvancedGoal(originalGoalId, newTarget, newName, var
   await db.goals.update(originalGoalId, {
     target: newTarget,
     name: newName || original.name,
-    status: 'active',
+    status: "active",
     updatedAt: now,
   });
 }
@@ -187,7 +199,7 @@ export async function saveRecoveryLog(data) {
   const today = todayString();
 
   // Check if already logged today
-  const existing = await db.recoveryLogs.where('date').equals(today).first();
+  const existing = await db.recoveryLogs.where("date").equals(today).first();
   if (existing) {
     await db.recoveryLogs.update(existing.id, { ...data, updatedAt: now });
     return existing.id;
@@ -214,7 +226,7 @@ export async function savePainLog(data) {
 
 /** Unlock achievement */
 export async function unlockAchievement(key) {
-  const existing = await db.achievements.where('key').equals(key).first();
+  const existing = await db.achievements.where("key").equals(key).first();
   if (existing) return false; // already unlocked
 
   await db.achievements.add({
@@ -226,41 +238,44 @@ export async function unlockAchievement(key) {
 
 /** Check all achievement conditions */
 export async function checkAchievements() {
-  const workoutCount = await db.workouts.where('status').equals('completed').count();
+  const workoutCount = await db.workouts
+    .where("status")
+    .equals("completed")
+    .count();
   const prCount = await db.personalRecords.count();
-  const totalReps = await db.workoutSets.toArray().then(sets =>
-    sets.reduce((sum, s) => sum + (s.reps || 0), 0)
-  );
+  const totalReps = await db.workoutSets
+    .toArray()
+    .then((sets) => sets.reduce((sum, s) => sum + (s.reps || 0), 0));
 
   const unlocked = [];
 
   if (workoutCount >= 1) {
-    const r = await unlockAchievement('first-workout');
-    if (r) unlocked.push('first-workout');
+    const r = await unlockAchievement("first-workout");
+    if (r) unlocked.push("first-workout");
   }
   if (workoutCount >= 100) {
-    const r = await unlockAchievement('100-workouts');
-    if (r) unlocked.push('100-workouts');
+    const r = await unlockAchievement("100-workouts");
+    if (r) unlocked.push("100-workouts");
   }
   if (prCount >= 1) {
-    const r = await unlockAchievement('first-pr');
-    if (r) unlocked.push('first-pr');
+    const r = await unlockAchievement("first-pr");
+    if (r) unlocked.push("first-pr");
   }
   if (prCount >= 10) {
-    const r = await unlockAchievement('10-prs');
-    if (r) unlocked.push('10-prs');
+    const r = await unlockAchievement("10-prs");
+    if (r) unlocked.push("10-prs");
   }
   if (prCount >= 50) {
-    const r = await unlockAchievement('50-prs');
-    if (r) unlocked.push('50-prs');
+    const r = await unlockAchievement("50-prs");
+    if (r) unlocked.push("50-prs");
   }
   if (totalReps >= 1000) {
-    const r = await unlockAchievement('1000-reps');
-    if (r) unlocked.push('1000-reps');
+    const r = await unlockAchievement("1000-reps");
+    if (r) unlocked.push("1000-reps");
   }
   if (totalReps >= 10000) {
-    const r = await unlockAchievement('10000-reps');
-    if (r) unlocked.push('10000-reps');
+    const r = await unlockAchievement("10000-reps");
+    if (r) unlocked.push("10000-reps");
   }
 
   return unlocked;
@@ -290,12 +305,12 @@ export async function exportAllData() {
 }
 
 /** Import data from JSON */
-export async function importData(data, mode = 'merge') {
+export async function importData(data, mode = "merge") {
   if (!data || !data.version) {
-    throw new Error('Invalid backup file format');
+    throw new Error("Invalid backup file format");
   }
 
-  if (mode === 'replace') {
+  if (mode === "replace") {
     // Clear all tables
     await Promise.all([
       db.settings.clear(),
@@ -317,14 +332,25 @@ export async function importData(data, mode = 'merge') {
 
   // Import each table
   const tables = [
-    'settings', 'goals', 'goalHistory', 'exercises', 'workouts',
-    'workoutSets', 'progressions', 'personalRecords', 'achievements',
-    'recoveryLogs', 'painLogs', 'calendarEvents', 'customWorkouts', 'weeklySchedule',
+    "settings",
+    "goals",
+    "goalHistory",
+    "exercises",
+    "workouts",
+    "workoutSets",
+    "progressions",
+    "personalRecords",
+    "achievements",
+    "recoveryLogs",
+    "painLogs",
+    "calendarEvents",
+    "customWorkouts",
+    "weeklySchedule",
   ];
 
   for (const table of tables) {
     if (data[table] && data[table].length > 0) {
-      if (mode === 'replace') {
+      if (mode === "replace") {
         await db[table].bulkAdd(data[table]);
       } else {
         // Merge: put (upsert)
@@ -337,7 +363,7 @@ export async function importData(data, mode = 'merge') {
 /** Reset specific data */
 export async function resetData(type) {
   switch (type) {
-    case 'progress':
+    case "progress":
       await Promise.all([
         db.workouts.clear(),
         db.workoutSets.clear(),
@@ -348,17 +374,20 @@ export async function resetData(type) {
       // Reset goal progress
       const goals = await db.goals.toArray();
       for (const goal of goals) {
-        await db.goals.update(goal.id, { currentBest: 0, achievedAt: null, status: 'active' });
+        await db.goals.update(goal.id, {
+          currentBest: 0,
+          achievedAt: null,
+          status: "active",
+        });
       }
       break;
-    case 'workouts':
-      await Promise.all([
-        db.workouts.clear(),
-        db.workoutSets.clear(),
-      ]);
+    case "workouts":
+      await Promise.all([db.workouts.clear(), db.workoutSets.clear()]);
       break;
-    case 'everything':
-      await Promise.all(Object.keys(db._dbSchema).map(table => db[table].clear()));
+    case "everything":
+      await Promise.all(
+        Object.keys(db._dbSchema).map((table) => db[table].clear()),
+      );
       break;
     default:
       break;
@@ -369,17 +398,18 @@ export async function resetData(type) {
 export async function getStats(days = 30) {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - days);
-  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const cutoffStr = cutoff.toISOString().split("T")[0];
 
   const workouts = await db.workouts
-    .where('date').aboveOrEqual(cutoffStr)
+    .where("date")
+    .aboveOrEqual(cutoffStr)
     .toArray();
 
-  const completedWorkouts = workouts.filter(w => w.status === 'completed');
+  const completedWorkouts = workouts.filter((w) => w.status === "completed");
 
-  const workoutIds = completedWorkouts.map(w => w.id);
+  const workoutIds = completedWorkouts.map((w) => w.id);
   const allSets = await db.workoutSets.toArray();
-  const sets = allSets.filter(s => workoutIds.includes(s.workoutId));
+  const sets = allSets.filter((s) => workoutIds.includes(s.workoutId));
 
   const totalSets = sets.length;
   const totalReps = sets.reduce((sum, s) => sum + (s.reps || 0), 0);
@@ -387,7 +417,7 @@ export async function getStats(days = 30) {
 
   // Exercise frequency
   const exerciseFreq = {};
-  sets.forEach(s => {
+  sets.forEach((s) => {
     exerciseFreq[s.exerciseId] = (exerciseFreq[s.exerciseId] || 0) + 1;
   });
 
@@ -404,19 +434,33 @@ export async function getStats(days = 30) {
 /** Calculate workout streak */
 export async function getWorkoutStreak() {
   const schedule = await db.weeklySchedule.toArray();
-  const restDays = schedule.filter(d => d.type === 'rest').map(d => d.dayOfWeek);
+  const restDays = schedule
+    .filter((d) => d.type === "rest")
+    .map((d) => d.dayOfWeek);
 
-  const workouts = await db.workouts
-    .where('status').equals('completed')
-    .toArray();
+  const workouts = await db.workouts.toArray();
+  const workoutsById = new Map(
+    workouts.map((workout) => [workout.id, workout]),
+  );
+  const workoutDates = new Set(
+    workouts
+      .filter((workout) => workout.status === "completed")
+      .map((workout) => workout.date),
+  );
 
-  const workoutDates = new Set(workouts.map(w => w.date));
+  const workoutSets = await db.workoutSets.toArray();
+  for (const set of workoutSets) {
+    const workout = workoutsById.get(set.workoutId);
+    if (workout && (set.reps > 0 || set.duration > 0)) {
+      workoutDates.add(workout.date);
+    }
+  }
 
   let streak = 0;
   let checkDate = new Date();
 
   for (let i = 0; i < 365; i++) {
-    const dateStr = checkDate.toISOString().split('T')[0];
+    const dateStr = checkDate.toISOString().split("T")[0];
     const dayOfWeek = checkDate.getDay();
 
     if (restDays.includes(dayOfWeek)) {

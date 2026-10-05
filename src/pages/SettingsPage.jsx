@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { motion } from 'framer-motion';
-import { Download, Upload, Trash2, RotateCcw, Volume2, Vibrate, Bell, Palette, ChevronRight } from 'lucide-react';
+import { Download, Upload, Trash2, RotateCcw, Volume2, Vibrate, Bell, ChevronRight } from 'lucide-react';
 import { useSettings } from '../hooks/useDatabase';
 import { setSetting } from '../db/database';
 import { exportAllData, importData, resetData } from '../db/services';
 import Card from '../components/ui/Card';
 import { ConfirmModal } from '../components/ui/BottomSheet';
 import BottomSheet from '../components/ui/BottomSheet';
+import { setWorkoutReminders } from '../utils/workoutReminders';
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } };
@@ -21,6 +23,7 @@ export default function SettingsPage() {
   const [importMode, setImportMode] = useState('merge');
   const [importError, setImportError] = useState('');
   const [importSuccess, setImportSuccess] = useState(false);
+  const [notificationError, setNotificationError] = useState('');
 
   const toggleSetting = async (key) => {
     await setSetting(key, !settings[key]);
@@ -73,6 +76,30 @@ export default function SettingsPage() {
     await setSetting('defaultRestTime', parseInt(value) || 60);
   };
 
+  const handleNotificationsChange = async () => {
+    const enabled = !settings.notificationsEnabled;
+    setNotificationError('');
+    try {
+      await setWorkoutReminders(enabled, settings.workoutReminderTime || '18:00');
+      await setSetting('notificationsEnabled', enabled);
+    } catch (error) {
+      setNotificationError(error.message || 'Could not update workout reminders.');
+    }
+  };
+
+  const handleReminderTimeChange = async (event) => {
+    const time = event.target.value;
+    setNotificationError('');
+    try {
+      if (settings.notificationsEnabled) {
+        await setWorkoutReminders(true, time);
+      }
+      await setSetting('workoutReminderTime', time);
+    } catch (error) {
+      setNotificationError(error.message || 'Could not update workout reminder time.');
+    }
+  };
+
   return (
     <motion.div
       className="min-h-screen pb-24 px-4 pt-6 safe-area-top"
@@ -118,15 +145,46 @@ export default function SettingsPage() {
           <Card className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Bell size={18} className="text-zinc-400" />
-              <span className="text-sm">Notifications</span>
+              <div>
+                <span className="text-sm">Workout Reminders</span>
+                <p className="text-xs text-zinc-500 mt-0.5">Buzz on scheduled workout days</p>
+              </div>
             </div>
             <button
-              onClick={() => toggleSetting('notificationsEnabled')}
+              onClick={handleNotificationsChange}
+              aria-label={`${settings.notificationsEnabled ? 'Disable' : 'Enable'} workout reminders`}
+              aria-pressed={!!settings.notificationsEnabled}
               className={`w-12 h-7 rounded-full transition-colors ${settings.notificationsEnabled ? 'bg-violet-600' : 'bg-zinc-700'}`}
             >
               <div className={`w-5 h-5 bg-white rounded-full transition-transform mx-1 ${settings.notificationsEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </Card>
+
+          {settings.notificationsEnabled && (
+            <Card>
+              <label htmlFor="workout-reminder-time" className="flex items-center justify-between gap-4">
+                <div>
+                  <span className="text-sm">Reminder time</span>
+                  <p className="text-xs text-zinc-500 mt-0.5">Uses your device's local time</p>
+                </div>
+                <input
+                  id="workout-reminder-time"
+                  type="time"
+                  value={settings.workoutReminderTime || '18:00'}
+                  onChange={handleReminderTimeChange}
+                  className="rounded-lg bg-zinc-800 px-3 py-2 text-sm text-zinc-100"
+                />
+              </label>
+            </Card>
+          )}
+          {notificationError && (
+            <p role="alert" className="text-xs text-red-400 px-1">{notificationError}</p>
+          )}
+          {!Capacitor.isNativePlatform() && (
+            <p className="text-xs text-zinc-500 px-1">
+              Scheduled reminders require the installed mobile app. Web browsers cannot reliably buzz while the app is closed.
+            </p>
+          )}
 
           <Card>
             <div className="flex items-center justify-between">
