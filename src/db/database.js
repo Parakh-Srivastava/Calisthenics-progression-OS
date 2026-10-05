@@ -28,6 +28,7 @@ export const DEFAULT_SETTINGS = {
   soundEnabled: true,
   hapticsEnabled: true,
   notificationsEnabled: false,
+  workoutReminderTime: '18:00',
   defaultRestTime: 60,
   defaultRIR: 2,
   weekStartDay: 1, // Monday
