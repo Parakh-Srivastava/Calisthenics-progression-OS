@@ -1,8 +1,11 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { App as CapacitorApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db/database';
 import BottomNav from './components/navigation/BottomNav';
+import { dismissTopBackAction } from './hooks/useBackDismiss';
 import Onboarding from './pages/Onboarding';
 import GoalsPage, { GoalDetailPage } from './pages/GoalsPage';
 import HistoryPage, { WorkoutDetailPage } from './pages/HistoryPage';
@@ -33,6 +36,61 @@ function LoadingScreen() {
   );
 }
 
+function BackHandler() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const locationRef = useRef(location);
+
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
+
+  useEffect(() => {
+    const handleBack = () => {
+      if (dismissTopBackAction()) return;
+
+      if (window.scrollY > 0) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      if (locationRef.current.pathname !== '/') {
+        navigate('/', { replace: true });
+      } else if (window.history.length > 1) {
+        window.history.back();
+      }
+    };
+
+    const handleKeyDown = event => {
+      if (event.key !== 'Backspace' || event.target instanceof HTMLElement && (
+        event.target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)
+      )) return;
+      event.preventDefault();
+      handleBack();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('popstate', handleBack);
+
+    let removeCapacitorListener;
+    if (Capacitor.isNativePlatform()) {
+      let listener;
+      CapacitorApp.addListener('backButton', handleBack).then(subscription => {
+        listener = subscription;
+        removeCapacitorListener = () => listener.remove();
+      });
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('popstate', handleBack);
+      removeCapacitorListener?.();
+    };
+  }, [navigate]);
+
+  return null;
+}
+
 export default function App() {
   const [isOnboarded, setIsOnboarded] = useState(null);
 
@@ -57,6 +115,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <BackHandler />
       <div className="min-h-screen bg-zinc-950 text-zinc-100">
         <Suspense fallback={<LoadingScreen />}>
           <Routes>

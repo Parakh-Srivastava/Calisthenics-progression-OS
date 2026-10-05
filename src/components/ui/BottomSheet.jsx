@@ -1,8 +1,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { useBackDismiss } from '../../hooks/useBackDismiss';
 
 /** Bottom sheet modal component */
 export default function BottomSheet({ isOpen, onClose, title, children, className = '' }) {
+  useBackDismiss(isOpen, onClose);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -53,6 +56,8 @@ export default function BottomSheet({ isOpen, onClose, title, children, classNam
 
 /** Confirmation modal */
 export function ConfirmModal({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', danger = false }) {
+  useBackDismiss(isOpen, onClose);
+
   return (
     <AnimatePresence>
       {isOpen && (
