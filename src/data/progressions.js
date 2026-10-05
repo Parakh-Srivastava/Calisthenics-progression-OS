@@ -1,0 +1,93 @@
+// All progression tree data for the five primary goals
+
+export const PROGRESSION_TREES = {
+  pullups: {
+    id: 'pullups',
+    name: 'Pull-Ups',
+    icon: '💪',
+    target: 15,
+    unit: 'reps',
+    levels: [
+      { id: 'dead-hang', name: 'Dead Hang', description: 'Hold the bar for 30+ seconds', target: 30, unit: 'sec', difficulty: 1 },
+      { id: 'scapular-pull', name: 'Scapular Pull', description: 'Active hang with scapular retraction', target: 10, unit: 'reps', difficulty: 2 },
+      { id: 'band-negative', name: 'Band-Assisted Negative', description: 'Slow controlled descent with band', target: 8, unit: 'reps', difficulty: 3 },
+      { id: 'band-pullup', name: 'Band-Assisted Pull-Up', description: 'Full pull-up with resistance band', target: 10, unit: 'reps', difficulty: 4 },
+      { id: 'first-pullup', name: 'First Pull-Up', description: 'One unassisted pull-up', target: 1, unit: 'reps', difficulty: 5 },
+      { id: '5-pullups', name: '5 Pull-Ups', description: 'Five clean pull-ups', target: 5, unit: 'reps', difficulty: 6 },
+      { id: '10-pullups', name: '10 Pull-Ups', description: 'Ten clean pull-ups', target: 10, unit: 'reps', difficulty: 7 },
+      { id: '15-pullups', name: '15 Pull-Ups', description: 'Fifteen clean pull-ups — GOAL', target: 15, unit: 'reps', difficulty: 8 },
+    ],
+  },
+  dips: {
+    id: 'dips',
+    name: 'Dips',
+    icon: '🔱',
+    target: 15,
+    unit: 'reps',
+    levels: [
+      { id: 'bench-dips', name: 'Bench Dips', description: 'Dips on a bench with feet on floor', target: 15, unit: 'reps', difficulty: 1 },
+      { id: 'bench-dips-elevated', name: 'Bench Dips — Feet Elevated', description: 'Bench dips with feet raised', target: 15, unit: 'reps', difficulty: 2 },
+      { id: 'bar-dip-top', name: 'Straight-Bar Dip — Top Half', description: 'Partial ROM on a bar', target: 10, unit: 'reps', difficulty: 3 },
+      { id: 'bar-dip', name: 'Straight-Bar Dip', description: 'Full dip on a straight bar', target: 10, unit: 'reps', difficulty: 4 },
+      { id: 'parallel-dip', name: 'Parallel-Bar Dip', description: 'Dips on parallel bars', target: 10, unit: 'reps', difficulty: 5 },
+      { id: '15-dips', name: '15 Dips', description: 'Fifteen clean dips — GOAL', target: 15, unit: 'reps', difficulty: 6 },
+    ],
+  },
+  oneArmPushup: {
+    id: 'oneArmPushup',
+    name: 'One-Arm Push-Up',
+    icon: '🫸',
+    target: 15,
+    unit: 'reps/arm',
+    levels: [
+      { id: 'pushups', name: 'Push-Ups', description: 'Standard push-ups', target: 20, unit: 'reps', difficulty: 1 },
+      { id: 'archer-pushups', name: 'Archer Push-Ups', description: 'Wide push-ups shifting weight', target: 10, unit: 'reps', difficulty: 3 },
+      { id: 'lever-pushups', name: 'Lever Push-Ups', description: 'One hand on elevated surface', target: 8, unit: 'reps', difficulty: 5 },
+      { id: 'assisted-oapu', name: 'Assisted One-Arm Push-Up', description: 'Fingertip or band assist', target: 5, unit: 'reps/arm', difficulty: 6 },
+      { id: 'one-arm-pushup', name: 'One-Arm Push-Up', description: 'Full one-arm push-up', target: 1, unit: 'reps/arm', difficulty: 7 },
+      { id: '5-oapu', name: '5/arm', description: 'Five per arm', target: 5, unit: 'reps/arm', difficulty: 8 },
+      { id: '10-oapu', name: '10/arm', description: 'Ten per arm', target: 10, unit: 'reps/arm', difficulty: 9 },
+      { id: '15-oapu', name: '15/arm', description: 'Fifteen per arm — GOAL', target: 15, unit: 'reps/arm', difficulty: 10 },
+    ],
+  },
+  pistolSquat: {
+    id: 'pistolSquat',
+    name: 'Pistol Squat',
+    icon: '🦵',
+    target: 15,
+    unit: 'reps/leg',
+    levels: [
+      { id: 'squat', name: 'Squat', description: 'Bodyweight squat', target: 20, unit: 'reps', difficulty: 1 },
+      { id: 'lunges', name: 'Lunges', description: 'Walking lunges', target: 15, unit: 'reps/leg', difficulty: 2 },
+      { id: 'bulgarian', name: 'Bulgarian Split Squat', description: 'Rear foot elevated split squat', target: 12, unit: 'reps/leg', difficulty: 3 },
+      { id: 'assisted-pistol', name: 'Assisted Pistol', description: 'Hold a pole or TRX', target: 8, unit: 'reps/leg', difficulty: 5 },
+      { id: 'box-pistol', name: 'Box Pistol', description: 'Pistol to a bench', target: 8, unit: 'reps/leg', difficulty: 6 },
+      { id: 'full-pistol', name: 'Full Pistol', description: 'Full range pistol squat', target: 1, unit: 'reps/leg', difficulty: 7 },
+      { id: '15-pistol', name: '15/leg', description: 'Fifteen per leg — GOAL', target: 15, unit: 'reps/leg', difficulty: 8 },
+    ],
+  },
+  hspu: {
+    id: 'hspu',
+    name: 'Handstand Push-Up',
+    icon: '🤸',
+    target: 15,
+    unit: 'reps',
+    levels: [
+      { id: 'pike-pushup', name: 'Pike Push-Up', description: 'Push-up in pike position', target: 10, unit: 'reps', difficulty: 1 },
+      { id: 'elevated-pike', name: 'Feet-Elevated Pike', description: 'Pike with feet on bench', target: 10, unit: 'reps', difficulty: 2 },
+      { id: 'wall-walk', name: 'Wall Walk', description: 'Walk up to handstand on wall', target: 5, unit: 'reps', difficulty: 3 },
+      { id: 'chest-wall-hold', name: 'Chest-to-Wall Hold', description: 'Hold handstand facing wall', target: 30, unit: 'sec', difficulty: 4 },
+      { id: 'partial-hspu', name: 'Partial HSPU', description: 'Partial range wall handstand push-up', target: 5, unit: 'reps', difficulty: 5 },
+      { id: 'full-wall-hspu', name: 'Full Wall HSPU', description: 'Full range wall handstand push-up', target: 5, unit: 'reps', difficulty: 6 },
+      { id: '15-hspu', name: '15 HSPU', description: 'Fifteen handstand push-ups — GOAL', target: 15, unit: 'reps', difficulty: 7 },
+    ],
+  },
+};
+
+export const GOAL_CATEGORIES = {
+  pullups: { name: '15 Pull-Ups', color: '#06b6d4', progressionTree: 'pullups' },
+  dips: { name: '15 Dips', color: '#7c3aed', progressionTree: 'dips' },
+  oneArmPushup: { name: '15 One-Arm Push-Ups/arm', color: '#f59e0b', progressionTree: 'oneArmPushup' },
+  pistolSquat: { name: '15 Pistol Squats/leg', color: '#22c55e', progressionTree: 'pistolSquat' },
+  hspu: { name: '15 Handstand Push-Ups', color: '#ef4444', progressionTree: 'hspu' },
+};
